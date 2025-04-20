@@ -1,0 +1,36 @@
+name: Build PX4 FMUv3 with inverted roll
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-20.04
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        submodules: recursive
+
+    - name: Install PX4 dependencies
+      run: |
+        sudo apt update
+        sudo apt install -y python3-pip python3-jinja2 python3-empy python3-toml \
+        python3-numpy ninja-build exiftool build-essential cmake genromfs \
+        wget python3-dev
+
+    - name: Install GCC Toolchain
+      run: |
+        wget https://developer.arm.com/-/media/Files/downloads/gnu-rm/10-2020q4/gcc-arm-none-eabi-10-2020-q4-major-x86_64-linux.tar.bz2
+        tar -xjf gcc-arm-none-eabi-10-2020-q4-major-x86_64-linux.tar.bz2
+        sudo mv gcc-arm-none-eabi-10-2020-q4-major /opt/
+        echo "/opt/gcc-arm-none-eabi-10-2020-q4-major/bin" >> $GITHUB_PATH
+
+    - name: Build PX4 FMUv3 firmware
+      run: |
+        make px4_fmu-v3_default
+
+    - name: Upload firmware
+      uses: actions/upload-artifact@v3
+      with:
+        name: px4_fmu-v3_inverted_roll
+        path: build/px4_fmu-v3_default/px4_fmu-v3_default.px4
