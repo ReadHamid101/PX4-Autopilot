@@ -321,9 +321,8 @@ void AttitudeEstimatorQ::update_vehicle_attitude()
 	if (update(dt)) {
 		vehicle_attitude_s vehicle_attitude{};
 		vehicle_attitude.timestamp_sample = _imu_timestamp;
-		// Invert roll by converting to Euler, negate roll, and convert back to quaternion
-Eulerf euler_angles(_q);
-euler_angles.roll = -euler_angles.roll;
+		Eulerf euler_angles(q);
+euler_angles = Eulerf(-euler_angles.phi(), euler_angles.theta(), euler_angles.psi());
 _q = Quatf(euler_angles);
 		_q.copyTo(vehicle_attitude.q);
 
