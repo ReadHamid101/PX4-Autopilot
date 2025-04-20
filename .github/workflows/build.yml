@@ -19,8 +19,12 @@ jobs:
           sudo apt install -y python3 python3-pip git cmake ninja-build exiftool zip wget
           sudo apt install -y gcc-arm-none-eabi gdb-arm-none-eabi
 
+      - name: Install PX4 Python tools
+        run: |
+          python3 -m pip install --upgrade pip
+          pip3 install empy toml numpy pandas jinja2 pyserial pyyaml cerberus kconfiglib
+
       - name: Build PX4 firmware
         run: |
           git submodule update --init --recursive
           make px4_fmu-v3_default
-          
