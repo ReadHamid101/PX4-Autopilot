@@ -1,4 +1,4 @@
-name: Build PX4 FMUv3 with inverted roll
+name: Build PX4 firmware with inverted roll
 
 on:
   push:
@@ -9,12 +9,12 @@ jobs:
     runs-on: ubuntu-22.04
 
     steps:
-      - name: Checkout PX4 Autopilot
+      - name: Checkout PX4 source
         uses: actions/checkout@v3
         with:
           submodules: recursive
 
-      - name: Install APT dependencies
+      - name: Install system dependencies
         run: |
           sudo apt update
           sudo apt install -y \
@@ -25,33 +25,19 @@ jobs:
             python3-pandas python3-yaml python3-serial python3-pyparsing \
             python3-cerberus python3-kconfiglib
 
-      - name: Install Python tools
+      - name: Install Python packages
         run: |
           python3 -m pip install --upgrade pip
           pip3 install \
             empy toml numpy pandas jinja2 pyserial pyyaml \
             cerberus kconfiglib pyulog packaging wheel
 
-      - name: Apply roll inversion patch
-        run: |
-          git apply <<'PATCH'
-diff --git a/src/modules/fw_att_control/FixedwingAttitudeControl.cpp b/src/modules/fw_att_control/FixedwingAttitudeControl.cpp
-index 9d8f4a6..b3c4e12 100644
---- a/src/modules/fw_att_control/FixedwingAttitudeControl.cpp
-+++ b/src/modules/fw_att_control/FixedwingAttitudeControl.cpp
-@@ -426,7 +426,7 @@ void FixedwingAttitudeControl::control_attitude(const matrix::Quatf &q, float dt)
-     // compute roll setpoint
-     float roll_sp = _att_sp.roll_body * _params.roll_lim;
--    _roll_ctrl.set_bodyrate_setpoint(roll_sp, current_rate.roll, dt);
-+    _roll_ctrl.set_bodyrate_setpoint(-roll_sp, current_rate.roll, dt);
-PATCH
-
-      - name: Build PX4 FMUv3 firmware
+      - name: Build PX4 firmware
         run: |
           make px4_fmu-v3_default
 
-      - name: Upload firmware artifact
+      - name: Upload PX4 firmware as artifact
         uses: actions/upload-artifact@v3
         with:
-          name: px4_fmu-v3_inverted-roll
+          name: px4_fmu-v3_firmware
           path: build/px4_fmu-v3_default/px4_fmu-v3_default.px4
