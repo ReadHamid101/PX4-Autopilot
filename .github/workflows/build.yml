@@ -1,43 +1,36 @@
-name: Build PX4 firmware with inverted roll
+name: Build Firmware
 
 on:
   push:
     branches: [ main ]
+  pull_request:
+    branches: [ main ]
 
 jobs:
   build:
-    runs-on: ubuntu-22.04
+    runs-on: self-hosted  # إذا كنت تستخدم GitHub Runner الرسمي اكتب: ubuntu-latest
 
     steps:
-      - name: Checkout PX4 source
+      - name: Checkout repository
         uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
         with:
-          submodules: recursive
+          python-version: '3.10'
 
-      - name: Install system dependencies
+      - name: Install dependencies
         run: |
-          sudo apt update
-          sudo apt install -y \
-            python3 python3-pip python3-dev python3-setuptools python3-wheel \
-            git wget curl zip unzip tar cmake ninja-build build-essential \
-            gcc-arm-none-eabi gdb-arm-none-eabi \
-            python3-jinja2 python3-numpy python3-empy python3-toml \
-            python3-pandas python3-yaml python3-serial python3-pyparsing \
-            python3-cerberus python3-kconfiglib
+          sudo apt-get update
+          sudo apt-get install -y make gcc g++  # غيّر هذا حسب متطلبات مشروعك
 
-      - name: Install Python packages
+      - name: Build project
         run: |
-          python3 -m pip install --upgrade pip
-          pip3 install \
-            empy toml numpy pandas jinja2 pyserial pyyaml \
-            cerberus kconfiglib pyulog packaging wheel
+          make  # أو أي أمر بناء تستخدمه مثل ./waf configure && ./waf build
 
-      - name: Build PX4 firmware
-        run: |
-          make px4_fmu-v3_default
-
-      - name: Upload PX4 firmware as artifact
-        uses: actions/upload-artifact@v2
+      - name: Upload build output
+        uses: actions/upload-artifact@v3
         with:
-          name: px4_fmu-v3_firmware
-          path: build/px4_fmu-v3_default/px4_fmu-v3_default.px4
+          name: build-output
+          path: |
+            build/     # عدّل هذا المسار حسب مجلد الإخراج لديك
