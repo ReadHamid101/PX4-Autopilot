@@ -1,26 +1,6 @@
-name: Build PX4 FMUv3
-
-on:
-  push:
-    branches:
-      - main
-
-jobs:
-  build:
-    runs-on: ubuntu-latest
-
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v3
-
-    - name: Install PX4 dependencies
-      run: |
-        sudo apt update
-        sudo apt install -y python3-pip git cmake build-essential ninja-build exiftool
-        sudo apt install -y gcc-arm-none-eabi g++-arm-none-eabi
-        pip3 install empy toml numpy jinja2 pyserial packaging
-
-    - name: Build PX4 firmware
-      run: |
-        bash ./Tools/setup/ubuntu.sh
-        make px4_fmu-v3_default
+- name: Install ARM GCC Toolchain
+  run: |
+    wget https://developer.arm.com/-/media/Files/downloads/gnu-rm/10.3-2021.10/gcc-arm-none-eabi-10.3-2021.10-x86_64-linux.tar.bz2
+    tar -xjf gcc-arm-none-eabi-10.3-2021.10-x86_64-linux.tar.bz2
+    sudo mv gcc-arm-none-eabi-10.3-2021.10 /opt/
+    echo "/opt/gcc-arm-none-eabi-10.3-2021.10/bin" >> $GITHUB_PATH
