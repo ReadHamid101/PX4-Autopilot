@@ -10,7 +10,7 @@ jobs:
 
     steps:
       - name: Checkout PX4 source
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           submodules: recursive
 
@@ -37,7 +37,7 @@ jobs:
           make px4_fmu-v3_default
 
       - name: Upload PX4 firmware as artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v2
         with:
           name: px4_fmu-v3_firmware
           path: build/px4_fmu-v3_default/px4_fmu-v3_default.px4
